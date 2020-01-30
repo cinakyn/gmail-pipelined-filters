@@ -148,6 +148,3 @@ Done. go to Gmail[https://mail.google.com/mail/u/0/#settings/filters] and import
 ```
 [Go to gmail setting page.](https://mail.google.com/mail/u/0/#settings/filters)
 ![filter image](img/filter.png)
-
----
-Finally, import this file on the gmail filter settings.

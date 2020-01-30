@@ -4,60 +4,49 @@ from filter import Pipeline, Filter, Operation, Clause, AND, OR, Option
 def main():
     Pipeline([
         Filter(
-            "Ignore",
+            'Ignore',
             Operation(OR, [
+                Clause('from:useless@words.com'),
                 Operation(AND, [
-                    Clause("from:noreply@md.getsentry.com"),
-                    Clause("subject:\"Advertisement\""),
-                    Clause("subject:\"False Alarm\""),
+                    Clause('from:noreply@spam.com'),
+                    Clause('subject:"Advertisement"'),
                 ]),
-                Operation(OR, [
-                    Clause("from:sam@example.com"),
-                    Clause("cc:jiwon@example.com"),
-                ]),
-                Clause("from:noreply@lokalise.com"),
-                Clause("to:cream@example.com"),
             ]),
             Option(apply_label=False, skip_inbox=True),
         ),
         Filter(
-            "Alarm",
+            'Alarm',
             Operation(OR, [
                 Operation(AND, [
-                    Clause("to:alarm@example.com"),
-                    Clause("subject:ALARM"),
+                    Clause('to:monitor@service.com'),
+                    Clause('subject:Panic'),
                 ]),
                 Operation(AND, [
-                    Clause("from:alert@dtdg.co"),
-                    Clause("to:monitor@md.getsentry.com"),
+                    Clause('from:alert@dtdg.co'),
                 ]),
-                Clause("from:noreply@md.getsentry.com"),
+                Clause('from:database@server.com'),
             ]),
         ),
         Filter(
-            "Report",
+            'Report',
             Operation(OR, [
-                Clause("subject:\"News\""),
-                Clause("subject:\"Weekly Report\""),
-                Clause("to:collector@example.com"),
+                Clause('subject:News'),
+                Clause('subject:"Weekly Report"'),
+                Clause('to:rss@example.com'),
             ]),
         ),
         Filter(
-            "SE/Game",
-            Clause("to:engineer+game@example.com"),
+            'Random',
+            Clause('from:random@company.com'),
         ),
         Filter(
-            "SE",
+            'Company',
             Operation(OR, [
-                Clause("to:engineer@example.com"),
-                Clause("to:request@example.com"),
+                Clause('to:engineer@example.com'),
+                Clause('to:request@example.com'),
             ]),
         ),
-        Filter(
-            "example",
-            Clause("from:@example.com"),
-        ),
-    ]).save("output.xml")
+    ]).save('output.xml')
 
 
 main()

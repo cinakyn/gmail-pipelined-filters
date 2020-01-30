@@ -16,7 +16,7 @@ class Clause(object):
 
     def __str__(self):
         if self.is_reverse:
-            return "-" + self.text
+            return '-' + self.text
         return self.text
 
 
@@ -38,10 +38,10 @@ class Operation(object):
     def __str__(self):
         output = map(lambda x: str(x), self.children)
         if self.op == AND:
-            output = " AND ".join(output)
+            output = ' AND '.join(output)
         else:
-            output = " OR ".join(output)
-        return "({})".format(output)
+            output = ' OR '.join(output)
+        return '({})'.format(output)
 
 
 class Option(object):
@@ -68,22 +68,22 @@ class Filter(object):
         return str(self.clause)
 
     def debug(self):
-        return "{} -- {}".format(self.name, str(self.clause))
+        return '{} -- {}'.format(self.name, str(self.clause))
 
     def entries(self):
         out = []
         # self first
-        root = ET.Element("entry")
-        ET.SubElement(root, "category", term="filter")
-        ET.SubElement(root, "title").text = "Mail Filters"
-        ET.SubElement(root, "content")
-        ET.SubElement(root, "apps:property", name="hasTheWord", value=str(self))
+        root = ET.Element('entry')
+        ET.SubElement(root, 'category', term='filter')
+        ET.SubElement(root, 'title').text = 'Mail Filters'
+        ET.SubElement(root, 'content')
+        ET.SubElement(root, 'apps:property', name='hasTheWord', value=str(self))
         if self.option.apply_label:
-            ET.SubElement(root, "apps:property", name="label", value=self.name)
+            ET.SubElement(root, 'apps:property', name='label', value=self.name)
         if self.option.skip_inbox:
-            ET.SubElement(root, "apps:property", name="shouldArchive", value="true")
-        ET.SubElement(root, "apps:property", name="sizeOperator", value="s_sl")
-        ET.SubElement(root, "apps:property", name="sizeUnit", value="s_smb")
+            ET.SubElement(root, 'apps:property', name='shouldArchive', value='true')
+        ET.SubElement(root, 'apps:property', name='sizeOperator', value='s_sl')
+        ET.SubElement(root, 'apps:property', name='sizeUnit', value='s_smb')
         out.append(root)
         return out
 
@@ -100,13 +100,13 @@ class Pipeline(object):
             print(f.debug())
             print()
         o = io.StringIO()
-        o.write("<?xml version='1.0' encoding='UTF-8'?><feed xmlns='http://www.w3.org/2005/Atom' xmlns:apps='http://schemas.google.com/apps/2006'><title>Mail Filters</title>")
+        o.write('<?xml version="1.0" encoding="UTF-8"?><feed xmlns="http://www.w3.org/2005/Atom" xmlns:apps="http://schemas.google.com/apps/2006"><title>Mail Filters</title>')
         for e in entries:
-            o.write(ET.tostring(e, encoding="unicode"))
-        o.write("</feed>")
+            o.write(ET.tostring(e, encoding='unicode'))
+        o.write('</feed>')
         o.seek(0)
         dom = xml.dom.minidom.parse(o)
-        with open(fname, "w") as f:
+        with open(fname, 'w') as f:
             f.write(dom.toprettyxml())
-        print("done. go gmail and export {}.".format(fname))
+        print('Done. go to Gmail[https://mail.google.com/mail/u/0/#settings/filters] and import {}'.format(fname))
 

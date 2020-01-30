@@ -29,72 +29,70 @@ from filter import Pipeline, Filter, Operation, Clause, AND, OR, Option
 def main():
     Pipeline([
         Filter(
-            "Ignore",
+            'Ignore',
             Operation(OR, [
+                Clause('from:useless@words.com'),
                 Operation(AND, [
-                    Clause("from:noreply@md.getsentry.com"),
-                    Clause("subject:\"Advertisement\""),
-                    Clause("subject:\"False Alarm\""),
+                    Clause('from:noreply@spam.com'),
+                    Clause('subject:"Advertisement"'),
                 ]),
-                Operation(OR, [
-                    Clause("from:sam@example.com"),
-                    Clause("cc:jiwon@example.com"),
-                ]),
-                Clause("from:noreply@lokalise.com"),
-                Clause("to:cream@example.com"),
             ]),
             Option(apply_label=False, skip_inbox=True),
         ),
         Filter(
-            "Alarm",
+            'Alarm',
             Operation(OR, [
                 Operation(AND, [
-                    Clause("to:alarm@example.com"),
-                    Clause("subject:ALARM"),
+                    Clause('to:monitor@service.com'),
+                    Clause('subject:Panic'),
                 ]),
                 Operation(AND, [
-                    Clause("from:alert@dtdg.co"),
-                    Clause("to:monitor@md.getsentry.com"),
+                    Clause('from:alert@dtdg.co'),
                 ]),
-                Clause("from:noreply@md.getsentry.com"),
+                Clause('from:database@server.com'),
             ]),
         ),
         Filter(
-            "Report",
+            'Report',
             Operation(OR, [
-                Clause("subject:\"News\""),
-                Clause("subject:\"Weekly Report\""),
-                Clause("to:collector@example.com"),
+                Clause('subject:News'),
+                Clause('subject:"Weekly Report"'),
+                Clause('to:rss@example.com'),
             ]),
         ),
         Filter(
-            "SE/Game",
-            Clause("to:engineer+game@example.com"),
+            'Random',
+            Clause('from:random@company.com'),
         ),
         Filter(
-            "SE",
+            'Company',
             Operation(OR, [
-                Clause("to:engineer@example.com"),
-                Clause("to:request@example.com"),
+                Clause('to:engineer@example.com'),
+                Clause('to:request@example.com'),
             ]),
         ),
-        Filter(
-            "example",
-            Clause("from:@example.com"),
-        ),
-    ]).save("output.xml")
+    ]).save('output.xml')
 
 
 main()
-
 ```
+---
 **run**
 ```
 $ python example.py
 
-(...short information will be printed...)
+Ignore -- ((from:useless@words.com OR (from:noreply@spam.com AND subject:"Advertisement")))
 
-done. go gmail and export output.xml.
+Alarm -- (((to:monitor@service.com AND subject:Panic) OR (from:alert@dtdg.co) OR from:database@server.com) AND (-from:useless@words.com AND (-from:noreply@spam.com OR -subject:"Advertisement")))
+
+Report -- ((subject:News OR subject:"Weekly Report" OR to:rss@example.com) AND (-from:useless@words.com AND (-from:noreply@spam.com OR -subject:"Advertisement")) AND ((-to:monitor@service.com OR -subject:Panic) AND (-from:alert@dtdg.co) AND -from:database@server.com))
+
+Random -- (from:random@company.com AND (-from:useless@words.com AND (-from:noreply@spam.com OR -subject:"Advertisement")) AND ((-to:monitor@service.com OR -subject:Panic) AND (-from:alert@dtdg.co) AND -from:database@server.com) AND (-subject:News AND -subject:"Weekly Report" AND -to:rss@example.com))
+
+Company -- ((to:engineer@example.com OR to:request@example.com) AND (-from:useless@words.com AND (-from:noreply@spam.com OR -subject:"Advertisement")) AND ((-to:monitor@service.com OR -subject:Panic) AND (-from:alert@dtdg.co) AND -from:database@server.com) AND (-subject:News AND -subject:"Weekly Report" AND -to:rss@example.com) AND -from:random@company.com)
+
+
+Done. go to Gmail[https://mail.google.com/mail/u/0/#settings/filters] and import output.xml
 ```
 **output.xml**
 ```xml
@@ -105,7 +103,7 @@ done. go gmail and export output.xml.
 		<category term="filter"/>
 		<title>Mail Filters</title>
 		<content/>
-		<apps:property name="hasTheWord" value="(((from:noreply@md.getsentry.com AND subject:&quot;Advertisement&quot; AND subject:&quot;False Alarm&quot;) OR (from:sam@example.com OR cc:jiwon@example.com) OR from:noreply@lokalise.com OR to:cream@example.com))"/>
+		<apps:property name="hasTheWord" value="((from:useless@words.com OR (from:noreply@spam.com AND subject:&quot;Advertisement&quot;)))"/>
 		<apps:property name="shouldArchive" value="true"/>
 		<apps:property name="sizeOperator" value="s_sl"/>
 		<apps:property name="sizeUnit" value="s_smb"/>
@@ -114,7 +112,7 @@ done. go gmail and export output.xml.
 		<category term="filter"/>
 		<title>Mail Filters</title>
 		<content/>
-		<apps:property name="hasTheWord" value="(((to:alarm@example.com AND subject:ALARM) OR (from:alert@dtdg.co AND to:monitor@md.getsentry.com) OR from:noreply@md.getsentry.com) AND ((-from:noreply@md.getsentry.com OR -subject:&quot;Advertisement&quot; OR -subject:&quot;False Alarm&quot;) AND (-from:sam@example.com AND -cc:jiwon@example.com) AND -from:noreply@lokalise.com AND -to:cream@example.com))"/>
+		<apps:property name="hasTheWord" value="(((to:monitor@service.com AND subject:Panic) OR (from:alert@dtdg.co) OR from:database@server.com) AND (-from:useless@words.com AND (-from:noreply@spam.com OR -subject:&quot;Advertisement&quot;)))"/>
 		<apps:property name="label" value="Alarm"/>
 		<apps:property name="sizeOperator" value="s_sl"/>
 		<apps:property name="sizeUnit" value="s_smb"/>
@@ -123,7 +121,7 @@ done. go gmail and export output.xml.
 		<category term="filter"/>
 		<title>Mail Filters</title>
 		<content/>
-		<apps:property name="hasTheWord" value="((subject:&quot;News&quot; OR subject:&quot;Weekly Report&quot; OR to:collector@example.com) AND ((-from:noreply@md.getsentry.com OR -subject:&quot;Advertisement&quot; OR -subject:&quot;False Alarm&quot;) AND (-from:sam@example.com AND -cc:jiwon@example.com) AND -from:noreply@lokalise.com AND -to:cream@example.com) AND ((-to:alarm@example.com OR -subject:ALARM) AND (-from:alert@dtdg.co OR -to:monitor@md.getsentry.com) AND -from:noreply@md.getsentry.com))"/>
+		<apps:property name="hasTheWord" value="((subject:News OR subject:&quot;Weekly Report&quot; OR to:rss@example.com) AND (-from:useless@words.com AND (-from:noreply@spam.com OR -subject:&quot;Advertisement&quot;)) AND ((-to:monitor@service.com OR -subject:Panic) AND (-from:alert@dtdg.co) AND -from:database@server.com))"/>
 		<apps:property name="label" value="Report"/>
 		<apps:property name="sizeOperator" value="s_sl"/>
 		<apps:property name="sizeUnit" value="s_smb"/>
@@ -132,8 +130,8 @@ done. go gmail and export output.xml.
 		<category term="filter"/>
 		<title>Mail Filters</title>
 		<content/>
-		<apps:property name="hasTheWord" value="(to:engineer+game@example.com AND ((-from:noreply@md.getsentry.com OR -subject:&quot;Advertisement&quot; OR -subject:&quot;False Alarm&quot;) AND (-from:sam@example.com AND -cc:jiwon@example.com) AND -from:noreply@lokalise.com AND -to:cream@example.com) AND ((-to:alarm@example.com OR -subject:ALARM) AND (-from:alert@dtdg.co OR -to:monitor@md.getsentry.com) AND -from:noreply@md.getsentry.com) AND (-subject:&quot;News&quot; AND -subject:&quot;Weekly Report&quot; AND -to:collector@example.com))"/>
-		<apps:property name="label" value="SE/Game"/>
+		<apps:property name="hasTheWord" value="(from:random@company.com AND (-from:useless@words.com AND (-from:noreply@spam.com OR -subject:&quot;Advertisement&quot;)) AND ((-to:monitor@service.com OR -subject:Panic) AND (-from:alert@dtdg.co) AND -from:database@server.com) AND (-subject:News AND -subject:&quot;Weekly Report&quot; AND -to:rss@example.com))"/>
+		<apps:property name="label" value="Random"/>
 		<apps:property name="sizeOperator" value="s_sl"/>
 		<apps:property name="sizeUnit" value="s_smb"/>
 	</entry>
@@ -141,22 +139,15 @@ done. go gmail and export output.xml.
 		<category term="filter"/>
 		<title>Mail Filters</title>
 		<content/>
-		<apps:property name="hasTheWord" value="((to:engineer@example.com OR to:request@example.com) AND ((-from:noreply@md.getsentry.com OR -subject:&quot;Advertisement&quot; OR -subject:&quot;False Alarm&quot;) AND (-from:sam@example.com AND -cc:jiwon@example.com) AND -from:noreply@lokalise.com AND -to:cream@example.com) AND ((-to:alarm@example.com OR -subject:ALARM) AND (-from:alert@dtdg.co OR -to:monitor@md.getsentry.com) AND -from:noreply@md.getsentry.com) AND (-subject:&quot;News&quot; AND -subject:&quot;Weekly Report&quot; AND -to:collector@example.com) AND -to:engineer+game@example.com)"/>
-		<apps:property name="label" value="SE"/>
-		<apps:property name="sizeOperator" value="s_sl"/>
-		<apps:property name="sizeUnit" value="s_smb"/>
-	</entry>
-	<entry>
-		<category term="filter"/>
-		<title>Mail Filters</title>
-		<content/>
-		<apps:property name="hasTheWord" value="(from:@example.com AND ((-from:noreply@md.getsentry.com OR -subject:&quot;Advertisement&quot; OR -subject:&quot;False Alarm&quot;) AND (-from:sam@example.com AND -cc:jiwon@example.com) AND -from:noreply@lokalise.com AND -to:cream@example.com) AND ((-to:alarm@example.com OR -subject:ALARM) AND (-from:alert@dtdg.co OR -to:monitor@md.getsentry.com) AND -from:noreply@md.getsentry.com) AND (-subject:&quot;News&quot; AND -subject:&quot;Weekly Report&quot; AND -to:collector@example.com) AND -to:engineer+game@example.com AND (-to:engineer@example.com AND -to:request@example.com))"/>
-		<apps:property name="label" value="example"/>
+		<apps:property name="hasTheWord" value="((to:engineer@example.com OR to:request@example.com) AND (-from:useless@words.com AND (-from:noreply@spam.com OR -subject:&quot;Advertisement&quot;)) AND ((-to:monitor@service.com OR -subject:Panic) AND (-from:alert@dtdg.co) AND -from:database@server.com) AND (-subject:News AND -subject:&quot;Weekly Report&quot; AND -to:rss@example.com) AND -from:random@company.com)"/>
+		<apps:property name="label" value="Company"/>
 		<apps:property name="sizeOperator" value="s_sl"/>
 		<apps:property name="sizeUnit" value="s_smb"/>
 	</entry>
 </feed>
 ```
+[Go to gmail setting page.](https://mail.google.com/mail/u/0/#settings/filters)
+![filter image](img/filter.png)
 
 ---
 Finally, import this file on the gmail filter settings.

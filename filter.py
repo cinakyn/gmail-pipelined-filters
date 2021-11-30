@@ -5,9 +5,12 @@ import io
 
 
 class Clause(object):
-    def __init__(self, text):
+    def __init__(self, tag, text):
         self.is_reverse = False
-        self.text = text
+        if len(tag) > 0:
+            self.text = ':'.join([tag, text])
+        else:
+            self.text = text
 
     def reverse(self):
         c = Clause(self.text)
@@ -20,28 +23,46 @@ class Clause(object):
         return self.text
 
 
+class NotClause(Clause):
+    def __init__(self, tag, text):
+        super().__init__(tag, text)
+        self.is_reverse = True
+
+
 AND = -1
 OR = 1
 
 
 class Operation(object):
     def __init__(self, op, children):
+        self.is_reverse = False
         self.op = copy.deepcopy(op)
         self.children = copy.deepcopy(children)
 
+    def __deepcopy__(self, _):
+        o = Operation(self.op, self.children)
+        o.is_reverse = self.is_reverse
+        return o
+
     def reverse(self):
-        o = Operation(-self.op, self.children)
-        for i in range(len(o.children)):
-            o.children[i] = o.children[i].reverse()
+        o = Operation(self.op, self.children)
+        o.is_reverse = not self.is_reverse
         return o
 
     def __str__(self):
-        output = map(lambda x: str(x), self.children)
-        if self.op == AND:
-            output = ' AND '.join(output)
+        output = list(map(lambda x: str(x), self.children))
+        if len(output) == 0:
+            return ''
+        elif len(output) == 1:
+            output = output[0]
+        elif self.op == AND:
+            output = "({})".format(' '.join(output))
         else:
-            output = ' OR '.join(output)
-        return '({})'.format(output)
+            output = "{{{}}}".format(' '.join(output))
+        if self.is_reverse:
+            return '-{}'.format(output)
+        else:
+            return '{}'.format(output)
 
 
 class Option(object):
@@ -58,11 +79,6 @@ class Filter(object):
             self.option = Option()
         else:
             self.option = copy.deepcopy(option)
-
-    def exclude(self, prev_filters):
-        cs = [self.clause]
-        cs.extend(map(lambda x: x.clause.reverse(), prev_filters))
-        return Filter(self.name, Operation(AND, cs), self.option)
 
     def __str__(self):
         return str(self.clause)
@@ -94,9 +110,13 @@ class Pipeline(object):
 
     def save(self, fname):
         entries = []
+        clause = None
         for i, f in enumerate(self.filters):
-            f = f.exclude(self.filters[:i])
+            if clause is not None:
+                o = Operation(AND, [f.clause, clause.reverse()])
+                f = Filter(f.name, o, f.option)
             entries.extend(f.entries())
+            clause = copy.deepcopy(f.clause)
             print(f.debug())
             print()
         o = io.StringIO()

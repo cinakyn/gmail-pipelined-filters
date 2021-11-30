@@ -6,10 +6,10 @@ def main():
         Filter(
             'Ignore',
             Operation(OR, [
-                Clause('from:useless@words.com'),
+                Clause('from", "useless@words.com'),
                 Operation(AND, [
-                    Clause('from:noreply@spam.com'),
-                    Clause('subject:"Advertisement"'),
+                    Clause('from", "noreply@spam.com'),
+                    Clause('subject", ""Advertisement"'),
                 ]),
             ]),
             Option(apply_label=False, skip_inbox=True),
@@ -18,32 +18,32 @@ def main():
             'Alarm',
             Operation(OR, [
                 Operation(AND, [
-                    Clause('to:monitor@service.com'),
-                    Clause('subject:Panic'),
+                    Clause('to", "monitor@service.com'),
+                    Clause('subject", "Panic'),
                 ]),
                 Operation(AND, [
-                    Clause('from:alert@dtdg.co'),
+                    Clause('from", "alert@dtdg.co'),
                 ]),
-                Clause('from:database@server.com'),
+                Clause('from", "database@server.com'),
             ]),
         ),
         Filter(
             'Report',
             Operation(OR, [
-                Clause('subject:News'),
-                Clause('subject:"Weekly Report"'),
-                Clause('to:rss@example.com'),
+                Clause('subject", "News'),
+                Clause('subject", ""Weekly Report"'),
+                Clause('to", "rss@example.com'),
             ]),
         ),
         Filter(
             'Random',
-            Clause('from:random@company.com'),
+            Clause('from", "random@company.com'),
         ),
         Filter(
             'Company',
             Operation(OR, [
-                Clause('to:engineer@example.com'),
-                Clause('to:request@example.com'),
+                Clause('to", "engineer@example.com'),
+                Clause('to", "request@example.com'),
             ]),
         ),
     ]).save('output.xml')
